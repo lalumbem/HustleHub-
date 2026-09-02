@@ -1,4 +1,4 @@
-# HustleHub+ Backend — Part 1: Secure Auth Foundation
+# HustleHub+ Backend — Secure Auth Foundation
 
 A secure Node.js/Express API providing registration, login, JWT
 authentication, input validation, HTTPS, and hardened error handling.
