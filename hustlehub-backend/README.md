@@ -72,8 +72,8 @@ POST https://localhost:3000/api/auth/register
 Content-Type: application/json
 
 {
-  "name": "Lerato Mokoena",
-  "email": "lerato@example.com",
+  "name": "mulweli lalumbe",
+  "email": "mulweli@example.com",
   "password": "Password123",
   "role": "freelancer"
 }
@@ -85,7 +85,7 @@ POST https://localhost:3000/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "lerato@example.com",
+  "email": "Mulweli@example.com",
   "password": "Password123"
 }
 ```
@@ -136,6 +136,4 @@ one was checked with `node --check` to confirm it parses correctly.
 However, this was built in a sandboxed environment with no internet
 access, so `npm install` could not be run here and the server was not
 started or hit with real requests end-to-end. Run the setup steps above on
-your own machine to do that — the code has been through a full review pass
-(see the report below) but you should still run the test cases yourself
-before submitting.
+your own machine to do that — the code has been through a full review pass.
