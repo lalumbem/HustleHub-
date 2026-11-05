@@ -7,6 +7,7 @@
     "start": "node src/server.js",
     "dev": "nodemon --ignore postman src/server.js",
     "dev:test": "set NODE_ENV=test&& nodemon --ignore postman src/server.js",
+    "test": "node --test",
     "gen-secret": "node -e \"console.log(require('crypto').randomBytes(48).toString('hex'))\"",
     "test:api": "newman run postman/HustleHub.postman_collection.json -e postman/HustleHub.postman_environment.json --insecure"
   },
