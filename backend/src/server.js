@@ -1,3 +1,4 @@
+
 require('dotenv').config();
 
 const validateEnv = require('./config/validateEnv');
@@ -20,9 +21,17 @@ const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware'
 const sanitizeInput = require('./middleware/sanitizeMiddleware');
 const { apiLimiter } = require('./middleware/rateLimiter');
 
+// Cloud logging
+const logger = require('./utils/logger');
+const requestLogger = require('./middleware/requestLogger');
+
 const app = express();
 
 app.disable('x-powered-by');
+
+// Record HTTP requests and response status codes
+app.use(requestLogger);
+
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
@@ -41,6 +50,7 @@ app.use(helmet({
 app.use(cors({
     origin: process.env.CORS_ORIGIN || 'http://localhost:3006'
 }));
+
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(mongoSanitize({ replaceWith: '_' }));
@@ -63,7 +73,7 @@ const CERT_KEY_PATH = path.join(__dirname, '..', 'cert', 'server.key');
 const CERT_CRT_PATH = path.join(__dirname, '..', 'cert', 'server.crt');
 
 if (!fs.existsSync(CERT_KEY_PATH) || !fs.existsSync(CERT_CRT_PATH)) {
-    console.error('Missing SSL certificate. Generate one first.');
+    logger.error('Missing SSL certificate. Generate one first.');
     process.exit(1);
 }
 
@@ -75,11 +85,17 @@ const sslOptions = {
 async function startServer() {
     try {
         await connectDB();
+
         https.createServer(sslOptions, app).listen(PORT, () => {
-            console.log(`HustleHub+ HTTPS API running on https://localhost:${PORT}`);
+            logger.info('HustleHub+ HTTPS API started', {
+                port: PORT,
+                environment: process.env.NODE_ENV || 'development'
+            });
         });
     } catch (error) {
-        console.error(`MongoDB connection failed: ${error.message}`);
+        logger.error('MongoDB connection failed', {
+            error: error.message
+        });
         process.exit(1);
     }
 }
