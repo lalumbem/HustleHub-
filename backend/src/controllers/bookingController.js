@@ -1,4 +1,4 @@
-
+```javascript
 const mongoose = require('mongoose');
 const Booking = require('../models/bookingModel');
 const Transaction = require('../models/transactionModel');
@@ -9,11 +9,17 @@ const createBooking = async (req, res, next) => {
     try {
         const { gigId } = req.body;
 
-        if (!mongoose.isValidObjectId(gigId)) {
+        // Validate the ID before using it in a database query.
+        if (
+            typeof gigId !== 'string' ||
+            !/^[a-fA-F0-9]{24}$/.test(gigId)
+        ) {
             return res.status(404).json({ message: 'Gig not found.' });
         }
 
-        const gig = await Gig.findById(gigId).lean();
+        const safeGigId = new mongoose.Types.ObjectId(gigId);
+
+        const gig = await Gig.findById(safeGigId).lean();
 
         if (!gig) {
             return res.status(404).json({ message: 'Gig not found.' });
@@ -133,3 +139,4 @@ module.exports = {
     createBooking,
     getMyBookings
 };
+```
