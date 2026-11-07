@@ -1,3 +1,4 @@
+```javascript
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
@@ -14,16 +15,35 @@ function publicUser(user) {
 const register = async (req, res, next) => {
     try {
         const { name, email, password, role } = req.body;
-        const existingUser = await User.findOne({ email }).lean();
+
+        // Validate input types before using them in database operations.
+        if (
+            typeof name !== 'string' ||
+            typeof email !== 'string' ||
+            typeof password !== 'string'
+        ) {
+            return res.status(400).json({ message: 'Invalid registration details.' });
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+
+        if (!normalizedEmail || normalizedEmail.length > 254) {
+            return res.status(400).json({ message: 'Invalid email address.' });
+        }
+
+        const existingUser = await User.findOne({
+            email: { $eq: normalizedEmail }
+        }).lean();
 
         if (existingUser) {
             return res.status(409).json({ message: 'A user with this email already exists.' });
         }
 
         const hashedPassword = await bcrypt.hash(password, 12);
+
         const user = await User.create({
-            name,
-            email,
+            name: name.trim(),
+            email: normalizedEmail,
             password: hashedPassword,
             role: role || 'client'
         });
@@ -43,13 +63,28 @@ const register = async (req, res, next) => {
 const login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
-        const user = await User.findOne({ email }).select('+password');
+
+        // Reject non-string values before querying the database.
+        if (typeof email !== 'string' || typeof password !== 'string') {
+            return res.status(400).json({ message: 'Invalid login details.' });
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+
+        if (!normalizedEmail || normalizedEmail.length > 254) {
+            return res.status(400).json({ message: 'Invalid email address.' });
+        }
+
+        const user = await User.findOne({
+            email: { $eq: normalizedEmail }
+        }).select('+password');
 
         if (!user) {
             return res.status(401).json({ message: 'Invalid email or password.' });
         }
 
         const passwordMatch = await bcrypt.compare(password, user.password);
+
         if (!passwordMatch) {
             return res.status(401).json({ message: 'Invalid email or password.' });
         }
@@ -71,3 +106,4 @@ const login = async (req, res, next) => {
 };
 
 module.exports = { register, login };
+```
